@@ -92,7 +92,7 @@ public class Meal {
         this.mealType = mealType;
         this.mealSize = mealSize;
         this.is_meal_of_the_week = is_meal_of_the_week;
-        this.discountFactor = (discountFactor != null) ? discountFactor : 0.10;
+        this.discountFactor = discoountFactor;
 
         validateMealComposition();
     }
@@ -135,7 +135,6 @@ public class Meal {
         for (MenuItem item : items) {
             total += item.getPrice()
         }
-        double discount = is_meal_of_the_week ? discountFactor : 0.05;
         return total * (1-discount);
     }
 }
