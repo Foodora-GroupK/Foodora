@@ -13,7 +13,8 @@ public class Customer {
 
     private List<Order> orderHistory;
     private FidelityCard fidelityCard;
-    private boolean allowSpecialOfferNotifications;
+    private int points;
+    private boolean notification;
 
     public Customer(String name, String surname, Coordinate address, String email, String phoneNumber, String username, String password) {
         this.id = IDGenerator.generateID("C");
@@ -27,7 +28,8 @@ public class Customer {
 
         this.orderHistory = new ArrayList<>();
         this.fidelityCard = null; // Not registered by default
-        this.allowSpecialOfferNotifications = false; // Default: no notifications
+        this.points = 0;
+        this.notification = new BasicFidelityCard(); // Default: no notifications
     }
 
     public boolean authenticate(String username, String password) {
@@ -36,10 +38,11 @@ public class Customer {
 
     // Place an order and add it to history
     public void placeOrder(Order order) {
+        double totalPrice = order.calculateTotalPrice();
+        double finalPrice = fidelityCard.applyDiscount(totalPrice, this);
+        order.setFinalPrice(finalPrice);
         orderHistory.add(order);
-        if (fidelityCard != null) {
-            fidelityCard.addPointsFromOrder(order);
-        }
+        System.out.printf("Order placed. Total: %.2f, Final after discount: %.2f\n", totalPrice, finalPrice);
     }
 
     // Register to a fidelity card plan
@@ -49,16 +52,23 @@ public class Customer {
 
     // Unregister from fidelity card
     public void unregisterFidelityCard() {
-        this.fidelityCard = null;
+        this.fidelityCard = new BasicFidelityCard(); //back to basic plan
     }
 
-    // Toggle notifications
-    public void giveConsensusForNotifications() {
-        this.allowSpecialOfferNotifications = true;
+    public void enableNotification() {
+        this.notification = true;
     }
 
-    public void removeConsensusForNotifications() {
-        this.allowSpecialOfferNotifications = false;
+    public void disableNotification() {
+        this.notification = false;
+    }
+
+    public void addPoints(int pts) {
+        this.points += pts;
+    }
+
+    public void deductPoints(int pts) {
+        this.points -= pts;
     }
 
     // Getters
@@ -66,19 +76,19 @@ public class Customer {
         return id;
     }
 
-    public List<Order> getOrderHistory() {
-        return Collections.unmodifiableList(orderHistory);
+    public String getUsername() {
+        return username;
     }
 
-    public boolean isSubscribedToNotifications() {
-        return allowSpecialOfferNotifications;
+    public List<Order> getOrderHistory() {
+        return orderHistory;
     }
 
     public FidelityCard getFidelityCard() {
         return fidelityCard;
     }
 
-    public String getUsername() {
-        return username;
+    public int getPoints() {
+        return this.points;
     }
 }
