@@ -12,7 +12,7 @@ public class Courier {
     private boolean onDuty;
 
     public Courier(String name, String surname, Coordinate location, String phoneNumber, String username, String password) {
-        this.id = idCounter++;
+        this.id = IDGenerator.generateID("D");
         this.name = name;
         this.surname = surname;
         this.position = position;

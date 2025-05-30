@@ -17,7 +17,7 @@ public class restaurant {
     private double defaultSpecialDiscountFactor = 0.10; // default for meal-of-the-week
     
     public Restaurat(String name, Coordinate location, String username, String password){
-        this.id = idCounter++;
+        this.id = IDGenerator.generateID("R");
         this.name = name;
         this.location = location;
         this.username = username;

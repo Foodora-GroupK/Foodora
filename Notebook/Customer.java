@@ -17,7 +17,7 @@ public class Customer {
     private boolean allowSpecialOfferNotifications;
 
     public Customer(String name, String surname, Coordinate address, String email, String phoneNumber, String username, String password) {
-        this.id = idCounter++;
+        this.id = IDGenerator.generateID("C");
         this.name = name;
         this.surname = surname;
         this.address = address;

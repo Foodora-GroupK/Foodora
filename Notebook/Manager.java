@@ -20,7 +20,7 @@ public class Manager {
     private List<Courier> couriers = new ArrayList<>();
 
     public Manager(String name, String surname, String username, String password) {
-        this.id = idCounter++;
+        this.id = IDGenerator.generateID("M");
         this.name = name;
         this.surname = surname;
         this.username = username;
