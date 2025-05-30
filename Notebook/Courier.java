@@ -1,23 +1,17 @@
-public class Courier {
+public class Courier extends User{
 
-    private final String id;
-    private String name;
     private String surname;
     private Coordinate location;
     private String phoneNumber;
     private int deliveredOrders;
-    private String username;
-    private String password;
     private boolean onDuty;
 
     public Courier(String name, String surname, Coordinate location, String phoneNumber, String username, String password) {
+        super(IDGenerator.generateID("CR"), name, username, password);
         this.id = IDGenerator.generateID("CR");
-        this.name = name;
         this.surname = surname;
         this.location = location;
         this.phoneNumber = phoneNumber;
-        this.username = username;
-        this.password = password;
         this.deliveredOrders = 0;
         this.onDuty = false;  // Default to off-duty
     }

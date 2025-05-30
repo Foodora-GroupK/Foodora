@@ -1,15 +1,11 @@
 import java.util.*;
 
-public class Customer {
+public class Customer extends User{
 
-    private final String id;
-    private String name;
     private String surname;
     private Coordinate address;
     private String email;
     private String phoneNumber;
-    private String username;
-    private String password;
 
     private List<Order> orderHistory;
     private FidelityCard fidelityCard;
@@ -17,14 +13,11 @@ public class Customer {
     private boolean notification;
 
     public Customer(String name, String surname, Coordinate address, String email, String phoneNumber, String username, String password) {
-        this.id = IDGenerator.generateID("C");
-        this.name = name;
+        super(IDGenerator.generateID("C"), name, username, password);
         this.surname = surname;
         this.address = address;
         this.email = email;
         this.phoneNumber = phoneNumber;
-        this.username = username;
-        this.password = password;
 
         this.orderHistory = new ArrayList<>();
         this.fidelityCard = null; // Not registered by default

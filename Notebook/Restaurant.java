@@ -1,13 +1,9 @@
 import java.util.ArrayList;
 import jave.util.List;
 
-public class restaurant {
+public class restaurant extends User{
 
-    private final String id;
-    private String name;
     private Coordinate location;
-    private String username;
-    private String passward;
     
     private Menu menu;
     private List<Meal> meals;
@@ -16,11 +12,9 @@ public class restaurant {
     private double defaultSpecialDiscountFactor = 0.10; // default for meal-of-the-week
     
     public Restaurat(String name, Coordinate location, String username, String password){
+        super(IDGenerator.generateID("R"), name, username, password);
         this.id = IDGenerator.generateID("R");
-        this.name = name;
         this.location = location;
-        this.username = username;
-        this.passward = passward;
 
         this.menu = new Menu();
         this.meals = new ArrayList<>();

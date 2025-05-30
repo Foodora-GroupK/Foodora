@@ -1,12 +1,8 @@
 import java.util.*;
 
-public class Manager {
+public class Manager extends User{
 
-    private final String id;
-    private String name;
     private String surname;
-    private String username;
-    private String password;
 
     // Configuration settings
     private double serviceFeePercentage = 0;
@@ -19,11 +15,8 @@ public class Manager {
     private List<Courier> couriers = new ArrayList<>();
 
     public Manager(String name, String surname, String username, String password) {
-        this.id = IDGenerator.generateID("M");
-        this.name = name;
+        super(IDGenerator.generateID("R"), name, username, password);
         this.surname = surname;
-        this.username = username;
-        this.password = password;
     }
 
     // Authentication
