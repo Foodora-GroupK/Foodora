@@ -1,24 +1,6 @@
 import java.util.ArrayList;
 import jave.util.List;
 
-public class Coordinate {
-    private double x;
-    private double y;
-
-    public Coordinate(double x, double y) {
-        this.x=x;
-        this.y=y;
-    }
-
-    public double getX() {
-        return x;
-    }
-
-    public double getY() {
-        return y;
-    }
-}
-
 public class restaurant {
     private static int idCounter = 1;
 
@@ -40,7 +22,7 @@ public class restaurant {
         this.location = location;
         this.username = username;
         this.passward = passward;
-        
+
         this.menu = new Menu();
         this.meals = new ArrayList<>();
     }
