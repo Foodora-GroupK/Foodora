@@ -2,8 +2,7 @@ import java.util.ArrayList;
 import jave.util.List;
 
 public class restaurant {
-    private static int idCounter = 1;
-
+    
     private final int id;
     private String name;
     private Coordinate location;

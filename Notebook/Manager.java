@@ -1,7 +1,6 @@
 import java.util.*;
 
 public class Manager {
-    private static int idCounter = 1;
 
     private final int id;
     private String name;
