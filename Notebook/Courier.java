@@ -11,10 +11,10 @@ public class Courier {
     private boolean onDuty;
 
     public Courier(String name, String surname, Coordinate location, String phoneNumber, String username, String password) {
-        this.id = IDGenerator.generateID("D");
+        this.id = IDGenerator.generateID("CR");
         this.name = name;
         this.surname = surname;
-        this.position = position;
+        this.location = location;
         this.phoneNumber = phoneNumber;
         this.username = username;
         this.password = password;
@@ -23,22 +23,6 @@ public class Courier {
     }
 
     // Getters
-    public int getId() { 
-        return id; 
-    }
-
-    public String getName() {
-        return name; 
-    }
-
-    public String getSurname() { 
-        return surname; 
-    }
-
-    public Point getLocation() { 
-        return location; 
-    }
-
     public boolean isOnDuty() { 
         return onDuty; 
     }
@@ -47,8 +31,8 @@ public class Courier {
         return deliveredOrders; 
     }
 
-    public String getUsername() { 
-        return username; 
+    public Coordinate getLocation() {
+        return location;
     }
 
     // Authentication method
@@ -67,16 +51,18 @@ public class Courier {
     }
 
     // Call when a delivery is completed
-    public void increseDeliveredOrders() {
+    public void completeDelivery() {
         this.deliveredOrders++;
     }
 
     // Courier response to delivery request
     public boolean acceptDeliveryCall() {
+        //어떻게 해야하는지 모르겠어요
         return true;
     }
 
     public boolean refuseDeliveryCall() {
+        //어떻게 해야하는지 모르겠어요
         return true;
     }
 }

@@ -71,27 +71,6 @@ public class restaurant {
         return defaultSpecialDiscountFactor;
     }
 
-    // getters
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Point getLocation() {
-        return location;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
     // authenticate
     public boolean authenticate(String username, String password) {
         return this.username.equals(username) && this.password.equals(password);

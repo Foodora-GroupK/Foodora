@@ -72,14 +72,6 @@ public class Customer {
     }
 
     // Getters
-    public int getId() {
-        return id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
     public List<Order> getOrderHistory() {
         return orderHistory;
     }
