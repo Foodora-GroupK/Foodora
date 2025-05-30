@@ -117,6 +117,11 @@ public class Manager {
         return activeCustomers.isEmpty() ? 0 : totalIncome / activeCustomers.size();
     }
 
+    // determine service fee/markup percentage/delivery cost to meet a target profit
+    public void determineServiceFee(ServiceFee servicefee){
+        
+    }
+
     public void determineDeliveryPolicy(DeliveryPolicy policy) {
         // Set a delivery policy (e.g., fastest courier, closest courier)
         // Implement policy pattern or strategy pattern if needed

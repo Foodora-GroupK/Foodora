@@ -1,5 +1,17 @@
 import java.util.*;
 
+public abstract class User {
+    protected String username;
+
+    public User(String username) {
+        this.username = username;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+}
+
 public class MyFoodoraSystem {
     private static MyFoodoraSystem instance;
 
@@ -21,41 +33,69 @@ public class MyFoodoraSystem {
         // Private constructor for Singleton
     }
 
-    public static MyFoodoraSystem getInstance() {
-        if (instance == null) {
-            instance = new MyFoodoraSystem();
+    // === User registration ===
+    public void registerUser(User user) {
+        if (user instanceof Manager) {
+            managers.add((Manager) user);
+        } else if (user instanceof Restaurant) {
+            restaurants.add((Restaurant) user);
+        } else if (user instanceof Customer) {
+            customers.add((Customer) user);
+        } else if (user instanceof Courier) {
+            couriers.add((Courier) user);
         }
-        return instance;
     }
 
-    // === Configuration setters ===
-    public void setServiceFee(double fee) {
-        this.serviceFee = fee;
+    // === Settings ===
+    public void setFees(double serviceFee, double markupPercentage, double deliveryCost) {
+        this.serviceFee = serviceFee;
+        this.markupPercentage = markupPercentage;
+        this.deliveryCost = deliveryCost;
     }
 
-    public void setMarkupPercentage(double percentage) {
-        this.markupPercentage = percentage;
-    }
-
-    public void setDeliveryCost(double cost) {
-        this.deliveryCost = cost;
-    }
-
-    public void setDeliveryPolicy(DeliveryPolicy policy) {
-        this.deliveryPolicy = policy;
+    // === Courier allocation ===
+    public Courier allocateCourier() {
+        return couriers.isEmpty() ? null : couriers.get(0); // Simplified
     }
 
     // === Order placement ===
-    public void placeOrder(Order order) {
-        Courier assignedCourier = deliveryPolicy.assignCourier(order, couriers);
-        if (assignedCourier != null) {
-            assignedCourier.incrementDeliveredOrders();
-            completedOrders.add(order);
-            notifySpecialOfferSubscribers(order.getRestaurant().getSpecialOffer());
+    public void placeOrder(Customer customer, Restaurant restaurant, double price) {
+        Courier courier = allocateCourier();
+        if (courier == null) {
+            System.out.println("No available courier.");
+            return;
+        }
+        Order order = new Order(customer, restaurant, courier, price);
+        completedOrders.add(order);
+        System.out.println("Order placed by " + customer.getUsername() +
+                           " assigned to " + courier.getUsername());
+    }
+
+    // === Notifications ===
+    public void notifySpecialOffer(String restaurantName) {
+        for (Customer customer : customers) {
+            if (customer.isSubscribedToOffers()) {
+                System.out.println("Notifying " + customer.getUsername() +
+                                   " about new offer from " + restaurantName);
+            }
         }
     }
 
-    // === Notification ===
-    public void notifySpecialOfferSubscribers(String offer) {
-        for (Customer customer : customers) {
-            if (customer.isSubscribedToOffers(
+    // === Income & Profit ===
+    public double computeTotalIncome() {
+        return completedOrders.stream().mapToDouble(Order::getPrice).sum();
+    }
+
+    public double computeTotalProfit() {
+        double profit = 0;
+        for (Order order : completedOrders) {
+            profit += order.getPrice() * markupPercentage + serviceFee - deliveryCost;
+        }
+        return profit;
+    }
+
+    // === Profit policy selection ===
+    public void chooseProfitPolicy(String policyName) {
+        System.out.println("Selected profit policy: " + policyName + " (implementation pending)");
+    }
+}
