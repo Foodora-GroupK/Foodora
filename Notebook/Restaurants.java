@@ -40,6 +40,7 @@ public class restaurant {
         this.location = location;
         this.username = username;
         this.passward = passward;
+        
         this.menu = new Menu();
         this.meals = new ArrayList<>();
     }
