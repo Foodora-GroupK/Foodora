@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Manager {
 
-    private final int id;
+    private final String id;
     private String name;
     private String surname;
     private String username;

@@ -1,6 +1,6 @@
 public class Courier {
 
-    private final int id;
+    private final String id;
     private String name;
     private String surname;
     private Coordinate location;

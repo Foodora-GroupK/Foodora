@@ -2,8 +2,8 @@ import java.util.ArrayList;
 import jave.util.List;
 
 public class restaurant {
-    
-    private final int id;
+
+    private final String id;
     private String name;
     private Coordinate location;
     private String username;
