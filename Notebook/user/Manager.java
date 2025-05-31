@@ -4,18 +4,9 @@ public class Manager extends User{
 
     private String surname;
 
-    // Configuration settings
-    private double serviceFeePercentage = 0;
-    private double markupPercentage = 0;
-    private double deliveryCost = 0;
-
-    // Registered users
-    private List<Restaurant> restaurants = new ArrayList<>();
-    private List<Customer> customers = new ArrayList<>();
-    private List<Courier> couriers = new ArrayList<>();
 
     public Manager(String name, String surname, String username, String password) {
-        super(IDGenerator.generateID("R"), name, username, password);
+        super(IDGenerator.generateID("M"), name, username, password);
         this.surname = surname;
     }
 
@@ -24,55 +15,22 @@ public class Manager extends User{
         return this.username.equals(username) && this.password.equals(password);
     }
 
-    // --- User management ---
-    public void addRestaurant(Restaurant r) {
-        restaurants.add(r);
+    public void addUser(User user) {
+        MyFoodoraSystem.getInstance().addUser(user);
     }
 
-    public void removeRestaurant(Restaurant r) {
-        restaurants.remove(r);
+    public void removeUser(User user) {
+        MyFoodoraSystem.getInstance().removeUser(user);
     }
 
-    public void activateRestaurant(Restaurant r) {
-        r.setActive(true);
+    public void activateUser(User user) {
+        user.setActive(true);
     }
 
-    public void deactivateRestaurant(Restaurant r) {
-        r.setActive(false);
+    public void deactivateUser(User user) {
+        user.setActive(false);
     }
-
-    public void addCustomer(Customer c) {
-        customers.add(c);
-    }
-
-    public void removeCustomer(Customer c) {
-        customers.remove(c);
-    }
-
-    public void activateCustomer(Customer c) {
-        c.setActive(true);
-    }
-
-    public void deactivateCustomer(Customer c) {
-        c.setActive(false);
-    }
-
-    public void addCourier(Courier c) {
-        couriers.add(c);
-    }
-
-    public void removeCourier(Courier c) {
-        couriers.remove(c);
-    }
-
-    public void activateCourier(Courier c) {
-        c.setActive(true);
-    }
-
-    public void deactivateCourier(Courier c) {
-        c.setActive(false);
-    }
-
+    
     // --- Configuration settings ---
     public void setServiceFeePercentage(double percentage) {
         this.serviceFeePercentage = percentage;
@@ -88,35 +46,23 @@ public class Manager extends User{
 
     // --- Statistics and business metrics (skeletons) ---
     public double computeTotalIncome(List<Order> orders) {
-        // Implement: total of all customer payments minus costs
-        return 0.0;
+        return MyFoodoraSystem.getInstance().computeTotalIncome();
     }
 
     public double computeTotalProfit(List<Order> orders) {
-        // Implement: income - delivery cost - item costs
-        return 0.0;
+        return MyFoodoraSystem.getInstance().computeTotalProfit();
     }
 
     public double computeAverageIncomePerCustomer(List<Order> orders) {
-        Set<Customer> activeCustomers = new HashSet<>();
-        double totalIncome = 0;
-
-        for (Order o : orders) {
-            totalIncome += o.getTotalPrice();
-            activeCustomers.add(o.getCustomer());
-        }
-
-        return activeCustomers.isEmpty() ? 0 : totalIncome / activeCustomers.size();
+        return MyFoodoraSystem.getInstance().computeAvgIncomePerCustomer();
     }
 
-    // determine service fee/markup percentage/delivery cost to meet a target profit
-    public void determineServiceFee(ServiceFee servicefee){
-        
+    public void optimizeForTargetProfit(double targetProfit) {
+        MyFoodoraSystem.getInstance().optimizeForTargetProfit(targetProfit);
     }
 
     public void determineDeliveryPolicy(DeliveryPolicy policy) {
-        // Set a delivery policy (e.g., fastest courier, closest courier)
-        // Implement policy pattern or strategy pattern if needed
+        MyFoodoraSystem.getInstance().setDeliveryPolicy(policy);
     }
 
     public Restaurant getMostSellingRestaurant(List<Order> orders) {
@@ -134,26 +80,5 @@ public class Manager extends User{
 
     public Courier getLeastActiveCourier(List<Order> orders) {
         return null;
-    }
-
-    // Getters (optional)
-    public double getServiceFeePercentage() {
-        return serviceFeePercentage;
-    }
-
-    public double getMarkupPercentage() {
-        return markupPercentage;
-    }
-
-    public double getDeliveryCost() {
-        return deliveryCost;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getUsername() {
-        return username;
     }
 }
