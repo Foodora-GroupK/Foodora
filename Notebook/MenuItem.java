@@ -8,7 +8,7 @@ public class MenuItem {
     private Type type;
     private boolean isGlutenFree;
     
-    public Menu(String name, double price, Category category, Type type, boolean is GlutenFree) {
+    public MenuItem(String name, double price, Category category, Type type, boolean isGlutenFree) {
         this.name = name;
         this.price = price;
         this.category = category;
