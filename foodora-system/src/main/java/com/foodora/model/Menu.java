@@ -45,6 +45,10 @@ public class Menu {
         return Collections.unmodifiableList(desserts);
     }
 
+    public List<MenuItem> getItems() {
+        return getAllItems();
+    }
+
     public List<MenuItem> getAllItems() {
         return Stream.of(starters, mainDishes, desserts)
                     .flatMap(List::stream)

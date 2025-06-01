@@ -1,15 +1,19 @@
+package com.foodora;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.HashMap;
 
-import deliveryPolicy.DeliveryPolicy;
-import deliveryPolicy.FastestDeliveryPolicy;
-import targetProfitPolicy.TargetProfitPolicy;
-import targetProfitPolicy.TargetProfitByServiceFee;
-import orderSortingPolicy.OrderSortingPolicy;
-import orderSortingPolicy.MostOrderedHalfMealPolicy;
+import com.foodora.policy.delivery.DeliveryPolicy;
+import com.foodora.policy.delivery.FastestDeliveryPolicy;
+import com.foodora.policy.target.TargetProfitPolicy;
+import com.foodora.policy.target.TargetProfitByServiceFee;
+import com.foodora.policy.order.OrderSortingPolicy;
+import com.foodora.policy.order.MostOrderedHalfMealPolicy;
+import com.foodora.user.*;
+import com.foodora.model.*;
 
 public class MyFoodoraSystem {
     private static MyFoodoraSystem instance;
@@ -177,10 +181,11 @@ public class MyFoodoraSystem {
     }
 
     // to sort orders
-    public void sortOrders() {
+    public Map<String, Integer> analyzeOrders() {
         if (orderSortingPolicy != null) {
-            orderSortingPolicy.sort(completedOrders);
+            return orderSortingPolicy.analyzeOrders(completedOrders);
         }
+        return new HashMap<>();
     }
 
     // Getters

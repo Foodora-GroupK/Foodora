@@ -1,7 +1,6 @@
 package com.foodora.user;
 
 import com.foodora.model.Order;
-import com.foodora.model.Restaurant;
 import com.foodora.fidelity.FidelityCard;
 import com.foodora.fidelity.BasicFidelityCard;
 import com.foodora.util.IDGenerator;
@@ -122,6 +121,10 @@ public class Customer extends User {
             throw new IllegalArgumentException("Insufficient points balance");
         }
         this.points -= pts;
+    }
+
+    public boolean hasNotificationsEnabled() {
+        return notification;
     }
 
     // Getters

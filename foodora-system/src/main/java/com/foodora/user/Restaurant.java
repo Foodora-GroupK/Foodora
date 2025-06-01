@@ -50,6 +50,13 @@ public class Restaurant extends User {
         LOGGER.info(String.format("Removed menu item: %s from restaurant %s", item.getName(), getName()));
     }
 
+    public void addMenuItems(List<MenuItem> items) {
+        Objects.requireNonNull(items, "Items list cannot be null");
+        for (MenuItem item : items) {
+            addMenuItem(item);
+        }
+    }
+
     public Menu getMenu() {
         return menu;
     }
@@ -67,8 +74,10 @@ public class Restaurant extends User {
         }
 
         // Verify all items are from this restaurant's menu
-        if (!menu.containsAll(items)) {
-            throw new IllegalArgumentException("All items must be from this restaurant's menu");
+        for (MenuItem item : items) {
+            if (!menu.getItems().contains(item)) {
+                throw new IllegalArgumentException("All items must be from this restaurant's menu");
+            }
         }
 
         double discount = isMealOfTheWeek ? defaultSpecialDiscountFactor : defaultGenericDiscountFactor;
@@ -116,21 +125,9 @@ public class Restaurant extends User {
     }
 
     // Notification System
-    private void notifyCustomers(String message) {
-        List<Customer> customersToNotify = MyFoodoraSystem.getInstance().getUsers().stream()
-            .filter(user -> user instanceof Customer)
-            .map(user -> (Customer) user)
-            .filter(Customer::hasNotificationsEnabled)
-            .collect(Collectors.toList());
-
-        for (Customer customer : customersToNotify) {
-            customer.notifySpecialOffer(this, message);
-        }
-
-        if (!customersToNotify.isEmpty()) {
-            LOGGER.info(String.format("Notified %d customers about: %s", 
-                customersToNotify.size(), message));
-        }
+    public void notifyCustomers(String message) {
+        MyFoodoraSystem.getInstance().notifySpecialOffer(this, message);
+        LOGGER.info(String.format("Sent notification: %s", message));
     }
 
     // Getters

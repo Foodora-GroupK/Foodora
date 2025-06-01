@@ -11,12 +11,14 @@ public abstract class User {
     protected String name;
     protected String username;
     protected String password;
+    protected boolean active;
 
     public User(String id, String name, String username, String password) {
         this.id = Objects.requireNonNull(id, "ID cannot be null");
         this.name = Objects.requireNonNull(name, "Name cannot be null");
         this.username = Objects.requireNonNull(username, "Username cannot be null");
         this.password = Objects.requireNonNull(password, "Password cannot be null");
+        this.active = true; // Users are active by default
         
         validateCredentials(username, password);
     }
@@ -47,6 +49,22 @@ public abstract class User {
      */
     public void updateName(String newName) {
         this.name = Objects.requireNonNull(newName, "Name cannot be null");
+    }
+
+    /**
+     * Sets the active status of the user.
+     * @param active true to activate the user, false to deactivate
+     */
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    /**
+     * Gets the active status of the user.
+     * @return true if the user is active, false otherwise
+     */
+    public boolean isActive() {
+        return active;
     }
 
     // Validation methods
