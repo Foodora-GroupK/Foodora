@@ -20,9 +20,9 @@ public class Customer extends User{
         this.phoneNumber = phoneNumber;
 
         this.orderHistory = new ArrayList<>();
-        this.fidelityCard = null; // Not registered by default
+        this.fidelityCard = new BasicFidelityCard();  // Initialize with BasicFidelityCard by default
         this.points = 0;
-        this.notification = new BasicFidelityCard(); // Default: no notifications
+        this.notification = false;  // Default: notifications disabled
     }
 
     public boolean authenticate(String username, String password) {
@@ -31,6 +31,9 @@ public class Customer extends User{
 
     // Place an order and add it to history
     public void placeOrder(Order order) {
+        if (fidelityCard == null) {
+            fidelityCard = new BasicFidelityCard();  // Ensure fidelityCard is never null
+        }
         double totalPrice = order.calculateTotalPrice();
         double finalPrice = fidelityCard.applyDiscount(totalPrice, this);
         order.setFinalPrice(finalPrice);
@@ -45,7 +48,7 @@ public class Customer extends User{
 
     // Unregister from fidelity card
     public void unregisterFidelityCard() {
-        this.fidelityCard = new BasicFidelityCard(); //back to basic plan
+        this.fidelityCard = new BasicFidelityCard();  // Reset to basic plan
     }
 
     public void enableNotification() {
@@ -54,6 +57,16 @@ public class Customer extends User{
 
     public void disableNotification() {
         this.notification = false;
+    }
+
+    public boolean hasNotificationsEnabled() {
+        return notification;
+    }
+
+    public void notifySpecialOffer(Restaurant restaurant, String message) {
+        if (notification) {
+            System.out.printf("🔔 Special offer from %s: %s\n", restaurant.getName(), message);
+        }
     }
 
     public void addPoints(int pts) {
@@ -75,5 +88,9 @@ public class Customer extends User{
 
     public int getPoints() {
         return this.points;
+    }
+
+    public Coordinate getAddress() {
+        return address;
     }
 }

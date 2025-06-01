@@ -1,7 +1,7 @@
 import java.util.ArrayList;
-import jave.util.List;
+import java.util.List;
 
-public class restaurant extends User{
+public class Restaurant extends User {
 
     private Coordinate location;
     
@@ -11,9 +11,8 @@ public class restaurant extends User{
     private double defaultGenericDiscountFactor = 0.05; // default for regular meals
     private double defaultSpecialDiscountFactor = 0.10; // default for meal-of-the-week
     
-    public Restaurat(String name, Coordinate location, String username, String password){
+    public Restaurant(String name, Coordinate location, String username, String password) {
         super(IDGenerator.generateID("R"), name, username, password);
-        this.id = IDGenerator.generateID("R");
         this.location = location;
 
         this.menu = new Menu();
@@ -34,9 +33,9 @@ public class restaurant extends User{
     }
 
     // edit meal
-    public void createMeal(List<MenuItem> items, Meal.MealType type, Meal.MealSize size, boolean isMealOfTheWeek) {
+    public void createMeal(String name, List<MenuItem> items, Meal.MealType type, Meal.MealSize size, boolean isMealOfTheWeek) {
         double discount = isMealOfTheWeek ? defaultSpecialDiscountFactor : defaultGenericDiscountFactor;
-        Meal newMeal = new Meal(items, type, size, isMealOfTheWeek, discount);
+        Meal newMeal = new Meal(name, items, type, size, isMealOfTheWeek, discount);
         meals.add(newMeal);
     }
 
@@ -68,5 +67,9 @@ public class restaurant extends User{
     // authenticate
     public boolean authenticate(String username, String password) {
         return this.username.equals(username) && this.password.equals(password);
+    }
+
+    public Coordinate getLocation() {
+        return location;
     }
 }

@@ -4,18 +4,19 @@ public class Meal {
     public enum MealType {STANDARD, VEGETARIAN, GLUTEN_FREE}
     public enum MealSize {HALF_MEAL, FULL_MEAL}
 
+    private String name;
     private List<MenuItem> items;
     private MealType mealType;
     private MealSize mealSize;
     private boolean is_meal_of_the_week;
     private double discountFactor;
 
-    public Meal(List<MenuItem> items, MealType mealType, MealSize mealSize, boolean is_meal_of_the_week, double discountFactor) {
+    public Meal(String name, List<MenuItem> items, MealType mealType, MealSize mealSize, boolean is_meal_of_the_week, double discountFactor) {
         this.items = items;
         this.mealType = mealType;
         this.mealSize = mealSize;
         this.is_meal_of_the_week = is_meal_of_the_week;
-        this.discountFactor = discoountFactor;
+        this.discountFactor = discountFactor;
 
         validateMeal();
     }
@@ -53,11 +54,19 @@ public class Meal {
         }
     }
 
+    public boolean isHalfMeal() {
+        return mealSize == MealSize.HALF_MEAL;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     public double getPrice() {
         double total = 0;
         for (MenuItem item : items) {
-            total += item.getPrice()
+            total += item.getPrice();
         }
-        return total * (1-discount);
+        return total * (1 - discountFactor);
     }
 }

@@ -1,9 +1,10 @@
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Manager extends User{
 
     private String surname;
-
+ 
 
     public Manager(String name, String surname, String username, String password) {
         super(IDGenerator.generateID("M"), name, username, password);
@@ -32,16 +33,19 @@ public class Manager extends User{
     }
     
     // --- Configuration settings ---
-    public void setServiceFeePercentage(double percentage) {
-        this.serviceFeePercentage = percentage;
+    public void setServiceFeePercentage(double serviceFee) {
+        MyFoodoraSystem system = MyFoodoraSystem.getInstance();
+        system.setFees(serviceFee, system.getMarkupPercentage(), system.getDeliveryCost());
     }
 
-    public void setMarkupPercentage(double percentage) {
-        this.markupPercentage = percentage;
+    public void setMarkupPercentage(double markup) {
+        MyFoodoraSystem system = MyFoodoraSystem.getInstance();
+        system.setFees(system.getServiceFee(), markup, system.getDeliveryCost());
     }
 
-    public void setDeliveryCost(double cost) {
-        this.deliveryCost = cost;
+    public void setDeliveryCost(double deliveryCost) {
+        MyFoodoraSystem system = MyFoodoraSystem.getInstance();
+        system.setFees(system.getServiceFee(), system.getMarkupPercentage(), deliveryCost);
     }
 
     // --- Statistics and business metrics (skeletons) ---
@@ -66,19 +70,88 @@ public class Manager extends User{
     }
 
     public Restaurant getMostSellingRestaurant(List<Order> orders) {
-        // Map<Restaurant, Integer> salesCount...
-        return null;
+        Map<Restaurant, Integer> salesCount = new HashMap<>();
+        
+        // Count orders per restaurant
+        for (Order order : orders) {
+            Restaurant restaurant = order.getRestaurant();
+            salesCount.put(restaurant, salesCount.getOrDefault(restaurant, 0) + 1);
+        }
+
+        // Find restaurant with maximum sales
+        return salesCount.entrySet().stream()
+            .max(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElse(null);
     }
 
     public Restaurant getLeastSellingRestaurant(List<Order> orders) {
-        return null;
+        Map<Restaurant, Integer> salesCount = new HashMap<>();
+        
+        // Get all restaurants from the system
+        Set<Restaurant> allRestaurants = MyFoodoraSystem.getInstance().getUsers().stream()
+            .filter(u -> u instanceof Restaurant)
+            .map(u -> (Restaurant) u)
+            .collect(Collectors.toSet());
+            
+        // Initialize count for all restaurants to 0
+        allRestaurants.forEach(r -> salesCount.put(r, 0));
+        
+        // Count orders per restaurant
+        for (Order order : orders) {
+            Restaurant restaurant = order.getRestaurant();
+            salesCount.put(restaurant, salesCount.getOrDefault(restaurant, 0) + 1);
+        }
+
+        // Find restaurant with minimum sales
+        return salesCount.entrySet().stream()
+            .min(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElse(null);
     }
 
     public Courier getMostActiveCourier(List<Order> orders) {
-        return null;
+        Map<Courier, Integer> deliveryCount = new HashMap<>();
+        
+        // Count deliveries per courier
+        for (Order order : orders) {
+            Courier courier = order.getCourier();
+            if (courier != null) {
+                deliveryCount.put(courier, deliveryCount.getOrDefault(courier, 0) + 1);
+            }
+        }
+
+        // Find courier with maximum deliveries
+        return deliveryCount.entrySet().stream()
+            .max(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElse(null);
     }
 
     public Courier getLeastActiveCourier(List<Order> orders) {
-        return null;
+        Map<Courier, Integer> deliveryCount = new HashMap<>();
+        
+        // Get all couriers from the system
+        Set<Courier> allCouriers = MyFoodoraSystem.getInstance().getUsers().stream()
+            .filter(u -> u instanceof Courier)
+            .map(u -> (Courier) u)
+            .collect(Collectors.toSet());
+            
+        // Initialize count for all couriers to 0
+        allCouriers.forEach(c -> deliveryCount.put(c, 0));
+        
+        // Count deliveries per courier
+        for (Order order : orders) {
+            Courier courier = order.getCourier();
+            if (courier != null) {
+                deliveryCount.put(courier, deliveryCount.getOrDefault(courier, 0) + 1);
+            }
+        }
+
+        // Find courier with minimum deliveries
+        return deliveryCount.entrySet().stream()
+            .min(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElse(null);
     }
 }

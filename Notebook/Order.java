@@ -37,4 +37,8 @@ public class Order {
 
     public List<MenuItem> getItems() { return items; }
     public List<Meal> getMeals() { return meals; }
+
+    public void setCourier(Courier courier) {
+        this.courier = courier;
+    }
 }
