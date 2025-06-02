@@ -1,0 +1,34 @@
+> login ceo 123456789
+Logged in as ceo
+> setup 4 3 5
+System setup with 4 restaurants, 3 customers, and 5 couriers
+> registerRestaurant "LeBistro" "10.5,20.3" "bistro1" "pass123"
+Restaurant registered successfully
+> registerRestaurant "PizzaPlace" "15.2,30.1" "pizza1" "pass456"
+Restaurant registered successfully
+> registerRestaurant "SushiBar" "25.4,40.2" "sushi1" "pass789"
+Restaurant registered successfully
+> registerRestaurant "TacoSpot" "30.1,45.6" "taco1" "pass101"
+Restaurant registered successfully
+> registerCustomer "John" "Doe" "john.doe" "5.5,10.2" "custpass1"
+Customer registered successfully
+> registerCustomer "Alice" "Smith" "alice.smith" "8.3,15.7" "custpass2"
+Customer registered successfully
+> registerCustomer "Bob" "Johnson" "bob.johnson" "12.1,22.4" "custpass3"
+Customer registered successfully
+> registerCourier "Mike" "Delivery" "mike.d" "7.5,12.3" "courpass1"
+Courier registered successfully
+> registerCourier "Sarah" "Express" "sarah.e" "18.2,25.6" "courpass2"
+Courier registered successfully
+> registerCourier "Tom" "Swift" "tom.s" "22.4,35.8" "courpass3"
+Courier registered successfully
+> registerCourier "Lisa" "Quick" "lisa.q" "15.7,28.9" "courpass4"
+Courier registered successfully
+> registerCourier "James" "Fast" "james.f" "30.2,42.1" "courpass5"
+Courier registered successfully
+> setDeliveryPolicy "fastest"
+Delivery policy updated successfully
+> setProfitPolicy "targeted"
+Profit policy updated successfully
+> logout
+Logged out successfully

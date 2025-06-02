@@ -1,0 +1,93 @@
+# Initial setup and manager login
+setup 4 3 5
+login ceo 123456789
+
+# Register restaurants
+registerRestaurant "LeBistro" "10.5,20.3" "bistro1" "pass123"
+registerRestaurant "PizzaPlace" "15.2,30.1" "pizza1" "pass456"
+registerRestaurant "SushiBar" "25.4,40.2" "sushi1" "pass789"
+ 
+# Register customers
+registerCustomer "John" "Doe" "john.doe" "5.5,10.2" "custpass1"
+registerCustomer "Alice" "Smith" "alice.smith" "8.3,15.7" "custpass2"
+registerCustomer "Bob" "Johnson" "bob.johnson" "12.1,22.4" "custpass3"
+
+# Register couriers
+registerCourier "Mike" "Delivery" "mike.d" "7.5,12.3" "courpass1"
+registerCourier "Sarah" "Express" "sarah.e" "18.2,25.6" "courpass2"
+
+# Set system policies
+setDeliveryPolicy "fastest"
+setProfitPolicy "targeted"
+
+# Associate fidelity cards with customers
+associateCard "john.doe" "basic"
+associateCard "alice.smith" "points"
+associateCard "bob.johnson" "lottery"
+
+# Restaurant operations - Login as restaurant and add menu items
+logout
+login bistro1 pass123
+
+addDishRestauarantMenu "French Onion Soup" "starter" "standard" "8.99"
+addDishRestauarantMenu "Coq au Vin" "main" "standard" "24.99"
+addDishRestauarantMenu "Creme Brulee" "dessert" "standard" "7.99"
+addDishRestauarantMenu "Vegetable Soup" "starter" "vegetarian" "7.99"
+addDishRestauarantMenu "Gluten-Free Pasta" "main" "gluten-free" "18.99"
+
+createMeal "Classic French Dinner"
+addDish2Meal "French Onion Soup" "Classic French Dinner"
+addDish2Meal "Coq au Vin" "Classic French Dinner"
+addDish2Meal "Creme Brulee" "Classic French Dinner"
+showMeal "Classic French Dinner"
+saveMeal "Classic French Dinner"
+setSpecialOffer "Classic French Dinner"
+
+createMeal "Healthy Choice"
+addDish2Meal "Vegetable Soup" "Healthy Choice"
+addDish2Meal "Gluten-Free Pasta" "Healthy Choice"
+showMeal "Healthy Choice"
+saveMeal "Healthy Choice"
+setSpecialOffer "Healthy Choice"
+removeFromSpecialOffer "Healthy Choice"
+
+# Customer operations - Login as customer and create order
+logout
+login john.doe custpass1
+
+createOrder "LeBistro" "Order1"
+addItem2Order "Order1" "Classic French Dinner"
+endOrder "Order1" "2024-03-20"
+
+# Courier operations
+logout
+login mike.d courpass1
+onDuty "mike.d"
+
+logout
+login sarah.e courpass2
+onDuty "sarah.e"
+findDeliverer "Order1"
+offDuty "sarah.e"
+
+# Manager operations - View system statistics
+logout
+login ceo 123456789
+
+showCourierDeliveries
+showRestaurantTop
+showCustomers
+showMenuItem "LeBistro"
+showTotalProfit
+showTotalProfit "2024-03-01" "2024-03-31"
+
+# Test error handling
+registerRestaurant "InvalidRestaurant" # Missing parameters to test error handling
+createOrder "NonExistentRestaurant" "BadOrder" # Try to order from non-existent restaurant
+addItem2Order "Order1" "NonExistentMeal" # Try to add non-existent meal to order
+
+# Test help system
+logout
+help
+
+logout 

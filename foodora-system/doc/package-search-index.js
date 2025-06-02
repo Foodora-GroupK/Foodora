@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.foodora"},{"l":"com.foodora.fidelity"},{"l":"com.foodora.model"},{"l":"com.foodora.policy.delivery"},{"l":"com.foodora.policy.order"},{"l":"com.foodora.policy.target"},{"l":"com.foodora.user"},{"l":"com.foodora.util"}];updateSearchResults();
