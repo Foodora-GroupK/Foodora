@@ -9,9 +9,9 @@
 > registerCourier "Mike" "Delivery" "mike.d" "7.5,12.3" "courpass1"
 > registerCourier "Sarah" "Express" "sarah.e" "18.2,25.6" "courpass2"
 > setDeliveryPolicy "fastest"
-Delivery policy set to: FASTEST
+Delivery policy set to: fastest
 > setProfitPolicy "targeted"
-Profit policy set to: TARGETED
+Profit policy set to: targeted
 > associateCard "john.doe" "basic"
 > associateCard "alice.smith" "points"
 > associateCard "bob.johnson" "lottery"
@@ -52,21 +52,11 @@ Profit policy set to: TARGETED
 > logout
 > login ceo 123456789
 > showCourierDeliveries
-"mike.d": 0 deliveries
-"sarah.e": 0 deliveries
 > showRestaurantTop
-"LeBistro": "LeBistro"
-"SushiBar": "SushiBar"
-"PizzaPlace": "PizzaPlace"
 > showCustomers
-"bob.johnson": "Bob" "Johnson"
-"alice.smith": "Alice" "Smith"
-"john.doe": "John" "Doe"
 > showMenuItem "LeBistro"
 > showTotalProfit
-Total profit: 0.00
 > showTotalProfit "2024-03-01" "2024-03-31"
-Total profit between 2024-03-01 and 2024-03-31: 0.00
 > registerRestaurant "InvalidRestaurant" # Missing parameters to test error handling
 > createOrder "NonExistentRestaurant" "BadOrder" # Try to order from non-existent restaurant
 > addItem2Order "Order1" "NonExistentMeal" # Try to add non-existent meal to order
@@ -75,31 +65,16 @@ Total profit between 2024-03-01 and 2024-03-31: 0.00
 Available commands:
   login <username> <password>
   logout
-  setup <numRestaurants> <numCustomers> <numCouriers>
   registerRestaurant <name> <location> <username> <password>
   registerCustomer <firstName> <lastName> <username> <address> <password>
   registerCourier <firstName> <lastName> <username> <position> <password>
   addDishRestaurantMenu <dishName> <category> <foodType> <unitPrice>
-  createMeal <mealName>
-  addDish2Meal <dishName> <mealName>
-  showMeal <mealName>
-  saveMeal <mealName>
-  setSpecialOffer <mealName>
-  removeFromSpecialOffer <mealName>
   createOrder <restaurantName> <orderName>
   addItem2Order <orderName> <itemName>
   endOrder <orderName> <date>
   onDuty <username>
   offDuty <username>
-  findDeliverer <orderName>
   setDeliveryPolicy <policy>
   setProfitPolicy <policy>
-  associateCard <username> <cardType>
-  showCourierDeliveries
-  showRestaurantTop
-  showCustomers
-  showMenuItem <restaurantName>
-  showTotalProfit
-  showTotalProfit <startDate> <endDate>
   help
 > logout

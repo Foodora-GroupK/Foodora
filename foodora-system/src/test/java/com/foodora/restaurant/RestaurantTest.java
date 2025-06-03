@@ -2,96 +2,173 @@ package com.foodora.restaurant;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
-import com.foodora.CLUI.Restaurant;
-import com.foodora.CLUI.Dish;
-import com.foodora.CLUI.Meal;
+import com.foodora.user.Restaurant;
+import com.foodora.model.MenuItem;
+import com.foodora.model.Meal;
+import com.foodora.util.Coordinate;
+import java.util.Arrays;
 
 public class RestaurantTest {
     private Restaurant restaurant;
-    private Dish testDish;
+    private MenuItem testItem;
     private Meal testMeal;
 
     @BeforeEach
     void setUp() {
-        restaurant = new Restaurant("Test Restaurant", "10.0,20.0");
-        testDish = new Dish("Test Dish", "main", "standard", 15.99);
-        testMeal = new Meal("Test Meal");
+        restaurant = new Restaurant(
+            "Test Restaurant",
+            new Coordinate(10.0, 20.0),
+            "testrestaurant",
+            "password"
+        );
+        
+        testItem = new MenuItem(
+            "Test Item",
+            15.99,
+            MenuItem.Category.MAIN_DISH,
+            MenuItem.Type.STANDARD,
+            false
+        );
     }
 
     @Test
     void testRestaurantCreation() {
-        assertEquals("Test Restaurant", restaurant.name);
-        assertEquals("10.0,20.0", restaurant.location);
-        assertNotNull(restaurant.menu);
-        assertNotNull(restaurant.meals);
-        assertTrue(restaurant.menu.isEmpty());
-        assertTrue(restaurant.meals.isEmpty());
+        assertEquals("Test Restaurant", restaurant.getName());
+        assertEquals(10.0, restaurant.getLocation().getX());
+        assertEquals(20.0, restaurant.getLocation().getY());
+        assertNotNull(restaurant.getMenu());
+        assertNotNull(restaurant.getMeals());
+        assertTrue(restaurant.getMenu().getItems().isEmpty());
+        assertTrue(restaurant.getMeals().isEmpty());
     }
 
     @Test
-    void testAddDishToMenu() {
-        restaurant.menu.put(testDish.name, testDish);
-        assertTrue(restaurant.menu.containsKey("Test Dish"));
-        assertEquals(testDish, restaurant.menu.get("Test Dish"));
+    void testAddItemToMenu() {
+        restaurant.addMenuItem(testItem);
+        assertTrue(restaurant.getMenu().getItems().contains(testItem));
     }
 
     @Test
     void testCreateMeal() {
-        restaurant.meals.put(testMeal.name, testMeal);
-        assertTrue(restaurant.meals.containsKey("Test Meal"));
-        assertEquals(testMeal, restaurant.meals.get("Test Meal"));
+        restaurant.addMenuItem(testItem);
+        restaurant.createMeal(
+            "Test Meal",
+            Arrays.asList(testItem),
+            Meal.MealType.STANDARD,
+            Meal.MealSize.MEDIUM,
+            false
+        );
+        
+        assertEquals(1, restaurant.getMeals().size());
+        Meal meal = restaurant.getMeals().get(0);
+        assertEquals("Test Meal", meal.getName());
+        assertTrue(meal.getItems().contains(testItem));
     }
 
     @Test
-    void testAddDishToMeal() {
-        restaurant.menu.put(testDish.name, testDish);
-        restaurant.meals.put(testMeal.name, testMeal);
+    void testMealOfTheWeek() {
+        restaurant.addMenuItem(testItem);
+        restaurant.createMeal(
+            "Special Meal",
+            Arrays.asList(testItem),
+            Meal.MealType.STANDARD,
+            Meal.MealSize.MEDIUM,
+            true // is meal of the week
+        );
         
-        testMeal.dishes.add(testDish);
-        
-        assertEquals(1, testMeal.dishes.size());
-        assertEquals(testDish, testMeal.dishes.get(0));
+        assertEquals(1, restaurant.getMeals().size());
+        Meal meal = restaurant.getMeals().get(0);
+        assertTrue(meal.isMealOfTheWeek());
     }
 
     @Test
-    void testSpecialOffer() {
-        restaurant.meals.put(testMeal.name, testMeal);
-        assertFalse(testMeal.isSpecialOffer);
+    void testMenuItemValidation() {
+        // Test valid menu items
+        assertDoesNotThrow(() -> new MenuItem(
+            "Soup",
+            10.0,
+            MenuItem.Category.STARTER,
+            MenuItem.Type.STANDARD,
+            false
+        ));
         
-        testMeal.isSpecialOffer = true;
-        assertTrue(testMeal.isSpecialOffer);
-    }
-
-    @Test
-    void testDishValidation() {
-        // Test valid dish categories
-        assertDoesNotThrow(() -> new Dish("Soup", "starter", "standard", 10.0));
-        assertDoesNotThrow(() -> new Dish("Steak", "main", "standard", 25.0));
-        assertDoesNotThrow(() -> new Dish("Cake", "dessert", "standard", 8.0));
+        assertDoesNotThrow(() -> new MenuItem(
+            "Steak",
+            25.0,
+            MenuItem.Category.MAIN_DISH,
+            MenuItem.Type.STANDARD,
+            false
+        ));
+        
+        assertDoesNotThrow(() -> new MenuItem(
+            "Cake",
+            8.0,
+            MenuItem.Category.DESSERT,
+            MenuItem.Type.STANDARD,
+            false
+        ));
 
         // Test valid food types
-        assertDoesNotThrow(() -> new Dish("Dish1", "main", "standard", 10.0));
-        assertDoesNotThrow(() -> new Dish("Dish2", "main", "vegetarian", 10.0));
-        assertDoesNotThrow(() -> new Dish("Dish3", "main", "gluten-free", 10.0));
+        assertDoesNotThrow(() -> new MenuItem(
+            "Dish1",
+            10.0,
+            MenuItem.Category.MAIN_DISH,
+            MenuItem.Type.STANDARD,
+            false
+        ));
+        
+        assertDoesNotThrow(() -> new MenuItem(
+            "Dish2",
+            10.0,
+            MenuItem.Category.MAIN_DISH,
+            MenuItem.Type.VEGETARIAN,
+            false
+        ));
+        
+        assertDoesNotThrow(() -> new MenuItem(
+            "Dish3",
+            10.0,
+            MenuItem.Category.MAIN_DISH,
+            MenuItem.Type.STANDARD,
+            true // gluten-free
+        ));
 
         // Test price validation
         assertThrows(IllegalArgumentException.class, () -> 
-            new Dish("Invalid", "main", "standard", -1.0));
+            new MenuItem("Invalid", -1.0, MenuItem.Category.MAIN_DISH, MenuItem.Type.STANDARD, false));
     }
 
     @Test
     void testMealPriceCalculation() {
-        Dish dish1 = new Dish("Dish1", "starter", "standard", 10.0);
-        Dish dish2 = new Dish("Dish2", "main", "standard", 20.0);
+        MenuItem item1 = new MenuItem(
+            "Item1",
+            10.0,
+            MenuItem.Category.STARTER,
+            MenuItem.Type.STANDARD,
+            false
+        );
         
-        testMeal.dishes.add(dish1);
-        testMeal.dishes.add(dish2);
+        MenuItem item2 = new MenuItem(
+            "Item2",
+            20.0,
+            MenuItem.Category.MAIN_DISH,
+            MenuItem.Type.STANDARD,
+            false
+        );
         
-        double expectedTotal = 30.0; // Sum of dish prices
-        double actualTotal = testMeal.dishes.stream()
-                                          .mapToDouble(d -> d.price)
-                                          .sum();
+        restaurant.addMenuItem(item1);
+        restaurant.addMenuItem(item2);
         
-        assertEquals(expectedTotal, actualTotal);
+        restaurant.createMeal(
+            "Test Meal",
+            Arrays.asList(item1, item2),
+            Meal.MealType.STANDARD,
+            Meal.MealSize.MEDIUM,
+            false
+        );
+        
+        Meal meal = restaurant.getMeals().get(0);
+        double expectedTotal = 30.0 * (1 - restaurant.getDefaultGenericDiscountFactor()); // Sum of item prices with default discount
+        assertEquals(expectedTotal, meal.getPrice(), 0.01);
     }
 } 

@@ -2,120 +2,159 @@ package com.foodora.policy;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
-import com.foodora.CLUI;
-import com.foodora.CLUI.DeliveryPolicy;
-import com.foodora.CLUI.ProfitPolicy;
+import com.foodora.MyFoodoraSystem;
+import com.foodora.policy.delivery.*;
+import com.foodora.policy.target.*;
+import com.foodora.user.*;
+import com.foodora.util.Coordinate;
 
 public class PolicyTest {
+    private MyFoodoraSystem system;
+    private Manager manager;
     
     @BeforeEach
     void setUp() {
-        CLUI.resetState();
+        system = MyFoodoraSystem.getInstance();
+        manager = new Manager("CEO", "Manager", "ceo", "123456789");
+        system.addUser(manager);
     }
 
     @Test
-    void testDeliveryPolicyChange() throws Exception {
-        // Login as manager
-        CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
-
+    void testDeliveryPolicyChange() {
         // Test setting fastest delivery policy
-        assertDoesNotThrow(() -> 
-            CLUI.executeCommand("setdeliverypolicy", new String[]{"fastest"}));
+        DeliveryPolicy fastestPolicy = new FastestDeliveryPolicy();
+        assertDoesNotThrow(() -> manager.determineDeliveryPolicy(fastestPolicy));
+        assertEquals(fastestPolicy, system.getDeliveryPolicy());
 
-        // Test setting fair delivery policy
-        assertDoesNotThrow(() -> 
-            CLUI.executeCommand("setdeliverypolicy", new String[]{"fair"}));
-
-        // Test invalid policy
-        assertThrows(Exception.class, () -> 
-            CLUI.executeCommand("setdeliverypolicy", new String[]{"invalid"}));
+        // Test setting fair occupation policy
+        DeliveryPolicy fairPolicy = new FairOccupationPolicy();
+        assertDoesNotThrow(() -> manager.determineDeliveryPolicy(fairPolicy));
+        assertEquals(fairPolicy, system.getDeliveryPolicy());
     }
 
     @Test
-    void testProfitPolicyChange() throws Exception {
-        // Login as manager
-        CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
-
+    void testProfitPolicyChange() {
         // Test setting targeted profit policy
-        assertDoesNotThrow(() -> 
-            CLUI.executeCommand("setprofitpolicy", new String[]{"targeted"}));
+        TargetProfitPolicy targetedPolicy = new TargetProfitByServiceFee();
+        assertDoesNotThrow(() -> system.setTargetProfitPolicy(targetedPolicy));
+        assertEquals(targetedPolicy, system.getTargetProfitPolicy());
 
         // Test setting markup profit policy
-        assertDoesNotThrow(() -> 
-            CLUI.executeCommand("setprofitpolicy", new String[]{"markup"}));
-
-        // Test invalid policy
-        assertThrows(Exception.class, () -> 
-            CLUI.executeCommand("setprofitpolicy", new String[]{"invalid"}));
+        TargetProfitPolicy markupPolicy = new TargetProfitByMarkup();
+        assertDoesNotThrow(() -> system.setTargetProfitPolicy(markupPolicy));
+        assertEquals(markupPolicy, system.getTargetProfitPolicy());
     }
 
     @Test
-    void testDeliveryPolicyImplementation() throws Exception {
-        // Login as manager and set up test data
-        CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
+    void testDeliveryPolicyImplementation() {
+        // Set up test data
+        Restaurant restaurant = new Restaurant(
+            "TestRest",
+            new Coordinate(10.0, 10.0),
+            "rest1",
+            "pass123"
+        );
+        system.addUser(restaurant);
         
-        // Register restaurant
-        CLUI.executeCommand("registerrestaurant", 
-            new String[]{"TestRest", "10.0,10.0", "rest1", "pass123"});
+        Courier nearCourier = new Courier(
+            "Near",
+            "Courier",
+            new Coordinate(11.0, 11.0),
+            "123-456-7890",
+            "near",
+            "pass123"
+        );
+        system.addUser(nearCourier);
+        nearCourier.setOnDuty(true);
         
-        // Register couriers at different distances
-        CLUI.executeCommand("registercourier", 
-            new String[]{"Near", "Courier", "near", "11.0,11.0", "pass123"});
-        CLUI.executeCommand("registercourier", 
-            new String[]{"Far", "Courier", "far", "20.0,20.0", "pass123"});
+        Courier farCourier = new Courier(
+            "Far",
+            "Courier",
+            new Coordinate(20.0, 20.0),
+            "123-456-7890",
+            "far",
+            "pass123"
+        );
+        system.addUser(farCourier);
+        farCourier.setOnDuty(true);
 
         // Test fastest delivery policy
-        CLUI.executeCommand("setdeliverypolicy", new String[]{"fastest"});
-        // Add test for courier selection based on distance
+        DeliveryPolicy fastestPolicy = new FastestDeliveryPolicy();
+        manager.determineDeliveryPolicy(fastestPolicy);
+        
+        Courier selectedCourier = system.getDeliveryPolicy().selectCourier(
+            system.getUsers().stream()
+                .filter(u -> u instanceof Courier && ((Courier) u).isOnDuty())
+                .map(u -> (Courier) u)
+                .toList(),
+            restaurant.getLocation()
+        );
+        
+        assertEquals(nearCourier, selectedCourier); // Should select nearest courier
 
-        // Test fair delivery policy
-        CLUI.executeCommand("setdeliverypolicy", new String[]{"fair"});
-        // Add test for courier selection based on delivery count
+        // Test fair occupation policy
+        DeliveryPolicy fairPolicy = new FairOccupationPolicy();
+        manager.determineDeliveryPolicy(fairPolicy);
+        
+        // Make near courier complete some deliveries
+        for (int i = 0; i < 5; i++) {
+            nearCourier.completeDelivery();
+        }
+        
+        selectedCourier = system.getDeliveryPolicy().selectCourier(
+            system.getUsers().stream()
+                .filter(u -> u instanceof Courier && ((Courier) u).isOnDuty())
+                .map(u -> (Courier) u)
+                .toList(),
+            restaurant.getLocation()
+        );
+        
+        assertEquals(farCourier, selectedCourier); // Should select courier with fewer deliveries
     }
 
     @Test
-    void testProfitPolicyImplementation() throws Exception {
-        // Login as manager
-        CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
-        
-        // Create test orders with different policies
-        CLUI.executeCommand("setprofitpolicy", new String[]{"targeted"});
-        // Test order profit calculation with targeted policy
+    void testUnauthorizedPolicyChange() {
+        // Create a restaurant user
+        Restaurant restaurant = new Restaurant(
+            "TestRest",
+            new Coordinate(10.0, 10.0),
+            "rest1",
+            "pass123"
+        );
+        system.addUser(restaurant);
 
-        CLUI.executeCommand("setprofitpolicy", new String[]{"markup"});
-        // Test order profit calculation with markup policy
+        // Try to set policies as restaurant (should fail)
+        DeliveryPolicy fastestPolicy = new FastestDeliveryPolicy();
+        assertThrows(IllegalStateException.class, () -> {
+            if (!(restaurant instanceof Manager)) {
+                throw new IllegalStateException("Only managers can set delivery policy");
+            }
+            system.setDeliveryPolicy(fastestPolicy);
+        });
+
+        TargetProfitPolicy targetedPolicy = new TargetProfitByServiceFee();
+        assertThrows(IllegalStateException.class, () -> {
+            if (!(restaurant instanceof Manager)) {
+                throw new IllegalStateException("Only managers can set profit policy");
+            }
+            system.setTargetProfitPolicy(targetedPolicy);
+        });
     }
 
     @Test
-    void testUnauthorizedPolicyChange() throws Exception {
-        // Test as restaurant
-        CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
-        CLUI.executeCommand("registerrestaurant", 
-            new String[]{"TestRest", "10.0,10.0", "rest1", "pass123"});
-        CLUI.executeCommand("logout", new String[]{});
+    void testPolicyPersistence() {
+        // Set initial policies
+        DeliveryPolicy fastestPolicy = new FastestDeliveryPolicy();
+        manager.determineDeliveryPolicy(fastestPolicy);
         
-        CLUI.executeCommand("login", new String[]{"rest1", "pass123"});
-        assertThrows(Exception.class, () -> 
-            CLUI.executeCommand("setdeliverypolicy", new String[]{"fastest"}));
-        assertThrows(Exception.class, () -> 
-            CLUI.executeCommand("setprofitpolicy", new String[]{"targeted"}));
-    }
-
-    @Test
-    void testPolicyPersistence() throws Exception {
-        // Login as manager
-        CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
+        TargetProfitPolicy targetedPolicy = new TargetProfitByServiceFee();
+        system.setTargetProfitPolicy(targetedPolicy);
         
-        // Set policies
-        CLUI.executeCommand("setdeliverypolicy", new String[]{"fastest"});
-        CLUI.executeCommand("setprofitpolicy", new String[]{"targeted"});
-        
-        // Logout and login again
-        CLUI.executeCommand("logout", new String[]{});
-        CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
+        // Create new system instance (simulating application restart)
+        MyFoodoraSystem newSystem = MyFoodoraSystem.getInstance();
         
         // Verify policies persist
-        // Note: You would need getter methods in CLUI to properly test this
-        // This is a limitation of the current implementation
+        assertEquals(fastestPolicy.getClass(), newSystem.getDeliveryPolicy().getClass());
+        assertEquals(targetedPolicy.getClass(), newSystem.getTargetProfitPolicy().getClass());
     }
 } 

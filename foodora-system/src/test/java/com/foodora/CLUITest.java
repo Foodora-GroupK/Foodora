@@ -10,11 +10,13 @@ import java.util.Arrays;
 public class CLUITest {
     private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
+    private MyFoodoraSystem system;
 
     @BeforeEach
     void setUp() {
         System.setOut(new PrintStream(outputStreamCaptor));
-        CLUI.resetState(); // We'll need to add this method
+        system = MyFoodoraSystem.getInstance();
+        system.reset(); // Clear all users and orders
     }
 
     @AfterEach
@@ -23,23 +25,13 @@ public class CLUITest {
     }
 
     @Test
-    void testSetup() {
-        // Test initial login as manager
-        assertDoesNotThrow(() -> CLUI.executeCommand("login", new String[]{"ceo", "123456789"}));
-        
-        // Test setup command
-        assertDoesNotThrow(() -> CLUI.executeCommand("setup", new String[]{"4", "3", "5"}));
-        assertTrue(outputStreamCaptor.toString().contains("System setup with 4 restaurants"));
-    }
-
-    @Test
-    void testLoginLogout() {
+    void testLoginLogout() throws Exception {
         // Test successful login
-        assertDoesNotThrow(() -> CLUI.executeCommand("login", new String[]{"ceo", "123456789"}));
+        CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
         assertTrue(outputStreamCaptor.toString().contains("Logged in as ceo"));
 
         // Test logout
-        assertDoesNotThrow(() -> CLUI.executeCommand("logout", new String[]{}));
+        CLUI.executeCommand("logout", new String[]{});
         assertTrue(outputStreamCaptor.toString().contains("Logged out successfully"));
 
         // Test invalid login
@@ -49,130 +41,137 @@ public class CLUITest {
     }
 
     @Test
-    void testRegisterRestaurant() {
+    void testRegisterRestaurant() throws Exception {
         // Login as manager first
-        assertDoesNotThrow(() -> CLUI.executeCommand("login", new String[]{"ceo", "123456789"}));
+        CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
 
         // Test restaurant registration
-        assertDoesNotThrow(() -> CLUI.executeCommand("registerrestaurant", 
-            new String[]{"LeBistro", "10.5,20.3", "bistro1", "pass123"}));
+        CLUI.executeCommand("registerrestaurant", 
+            new String[]{"LeBistro", "10.5,20.3", "bistro1", "pass123"});
+        
+        assertTrue(system.getUsers().stream()
+            .anyMatch(u -> u.getUsername().equals("bistro1")));
 
         // Test duplicate restaurant
         Exception exception = assertThrows(Exception.class, 
             () -> CLUI.executeCommand("registerrestaurant", 
                 new String[]{"LeBistro", "10.5,20.3", "bistro1", "pass123"}));
-        assertEquals("Restaurant already exists", exception.getMessage());
+        assertEquals("Username already exists", exception.getMessage());
     }
 
     @Test
-    void testRegisterCustomer() {
+    void testRegisterCustomer() throws Exception {
         // Login as manager
-        assertDoesNotThrow(() -> CLUI.executeCommand("login", new String[]{"ceo", "123456789"}));
+        CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
 
         // Test customer registration
-        assertDoesNotThrow(() -> CLUI.executeCommand("registercustomer", 
-            new String[]{"John", "Doe", "john.doe", "5.5,10.2", "custpass1"}));
+        CLUI.executeCommand("registercustomer", 
+            new String[]{"John", "Doe", "john.doe", "5.5,10.2", "custpass1"});
+        
+        assertTrue(system.getUsers().stream()
+            .anyMatch(u -> u.getUsername().equals("john.doe")));
 
         // Test duplicate customer
         Exception exception = assertThrows(Exception.class, 
             () -> CLUI.executeCommand("registercustomer", 
                 new String[]{"John", "Doe", "john.doe", "5.5,10.2", "custpass1"}));
-        assertEquals("Customer already exists", exception.getMessage());
+        assertEquals("Username already exists", exception.getMessage());
     }
 
     @Test
-    void testRestaurantMenu() {
+    void testRestaurantMenu() throws Exception {
         // Setup restaurant
-        assertDoesNotThrow(() -> {
-            CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
-            CLUI.executeCommand("registerrestaurant", 
-                new String[]{"LeBistro", "10.5,20.3", "bistro1", "pass123"});
-            CLUI.executeCommand("logout", new String[]{});
-            CLUI.executeCommand("login", new String[]{"bistro1", "pass123"});
-        });
+        CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
+        CLUI.executeCommand("registerrestaurant", 
+            new String[]{"LeBistro", "10.5,20.3", "bistro1", "pass123"});
+        CLUI.executeCommand("logout", new String[]{});
+        CLUI.executeCommand("login", new String[]{"bistro1", "pass123"});
 
         // Test adding dish to menu
-        assertDoesNotThrow(() -> CLUI.executeCommand("adddishrestaurantmenu", 
-            new String[]{"French Onion Soup", "starter", "standard", "8.99"}));
-
-        // Test creating meal
-        assertDoesNotThrow(() -> {
-            CLUI.executeCommand("createmeal", new String[]{"Classic French Dinner"});
-            CLUI.executeCommand("adddish2meal", 
-                new String[]{"French Onion Soup", "Classic French Dinner"});
-            CLUI.executeCommand("savemeal", new String[]{"Classic French Dinner"});
-        });
-
-        // Test special offer
-        assertDoesNotThrow(() -> CLUI.executeCommand("setspecialoffer", 
-            new String[]{"Classic French Dinner"}));
+        CLUI.executeCommand("adddishrestaurantmenu", 
+            new String[]{"French Onion Soup", "starter", "standard", "8.99"});
+        
+        // Verify the menu item was added
+        assertTrue(system.getUsers().stream()
+            .filter(u -> u.getUsername().equals("bistro1"))
+            .map(u -> (com.foodora.user.Restaurant) u)
+            .findFirst()
+            .get()
+            .getMenu()
+            .getItems()
+            .stream()
+            .anyMatch(item -> item.getName().equals("French Onion Soup")));
     }
 
     @Test
-    void testOrderProcess() {
+    void testOrderProcess() throws Exception {
         // Setup restaurant and customer
-        assertDoesNotThrow(() -> {
-            // Register restaurant and add menu items
-            CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
-            CLUI.executeCommand("registerrestaurant", 
-                new String[]{"LeBistro", "10.5,20.3", "bistro1", "pass123"});
-            CLUI.executeCommand("registercustomer", 
-                new String[]{"John", "Doe", "john.doe", "5.5,10.2", "custpass1"});
-            CLUI.executeCommand("logout", new String[]{});
-            
-            // Add menu items
-            CLUI.executeCommand("login", new String[]{"bistro1", "pass123"});
-            CLUI.executeCommand("adddishrestaurantmenu", 
-                new String[]{"French Onion Soup", "starter", "standard", "8.99"});
-            CLUI.executeCommand("logout", new String[]{});
-            
-            // Create order as customer
-            CLUI.executeCommand("login", new String[]{"john.doe", "custpass1"});
-        });
+        CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
+        CLUI.executeCommand("registerrestaurant", 
+            new String[]{"LeBistro", "10.5,20.3", "bistro1", "pass123"});
+        CLUI.executeCommand("registercustomer", 
+            new String[]{"John", "Doe", "john.doe", "5.5,10.2", "custpass1"});
+        CLUI.executeCommand("logout", new String[]{});
+        
+        // Add menu items
+        CLUI.executeCommand("login", new String[]{"bistro1", "pass123"});
+        CLUI.executeCommand("adddishrestaurantmenu", 
+            new String[]{"French Onion Soup", "starter", "standard", "8.99"});
+        CLUI.executeCommand("logout", new String[]{});
+        
+        // Create order as customer
+        CLUI.executeCommand("login", new String[]{"john.doe", "custpass1"});
 
         // Test order creation and completion
-        assertDoesNotThrow(() -> {
-            CLUI.executeCommand("createorder", new String[]{"LeBistro", "Order1"});
-            CLUI.executeCommand("additem2order", new String[]{"Order1", "French Onion Soup"});
-            CLUI.executeCommand("endorder", new String[]{"Order1", "2024-03-20"});
-        });
+        CLUI.executeCommand("createorder", new String[]{"LeBistro", "Order1"});
+        CLUI.executeCommand("additem2order", new String[]{"Order1", "French Onion Soup"});
+        CLUI.executeCommand("endorder", new String[]{"Order1", "2024-03-20"});
+        
+        // Verify order was completed
+        assertFalse(system.getCompletedOrders().isEmpty());
     }
 
     @Test
-    void testCourierOperations() {
+    void testCourierOperations() throws Exception {
         // Setup courier
-        assertDoesNotThrow(() -> {
-            CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
-            CLUI.executeCommand("registercourier", 
-                new String[]{"Mike", "Delivery", "mike.d", "7.5,12.3", "courpass1"});
-            CLUI.executeCommand("logout", new String[]{});
-            CLUI.executeCommand("login", new String[]{"mike.d", "courpass1"});
-        });
+        CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
+        CLUI.executeCommand("registercourier", 
+            new String[]{"Mike", "Delivery", "mike.d", "7.5,12.3", "courpass1"});
+        CLUI.executeCommand("logout", new String[]{});
+        CLUI.executeCommand("login", new String[]{"mike.d", "courpass1"});
 
         // Test duty status changes
-        assertDoesNotThrow(() -> {
-            CLUI.executeCommand("onduty", new String[]{"mike.d"});
-            CLUI.executeCommand("offduty", new String[]{"mike.d"});
-        });
+        CLUI.executeCommand("onduty", new String[]{"mike.d"});
+        
+        // Verify courier is on duty
+        assertTrue(system.getUsers().stream()
+            .filter(u -> u.getUsername().equals("mike.d"))
+            .map(u -> (com.foodora.user.Courier) u)
+            .findFirst()
+            .get()
+            .isOnDuty());
+
+        CLUI.executeCommand("offduty", new String[]{"mike.d"});
+        
+        // Verify courier is off duty
+        assertFalse(system.getUsers().stream()
+            .filter(u -> u.getUsername().equals("mike.d"))
+            .map(u -> (com.foodora.user.Courier) u)
+            .findFirst()
+            .get()
+            .isOnDuty());
     }
 
     @Test
-    void testManagerOperations() {
+    void testManagerOperations() throws Exception {
         // Login as manager
-        assertDoesNotThrow(() -> CLUI.executeCommand("login", new String[]{"ceo", "123456789"}));
+        CLUI.executeCommand("login", new String[]{"ceo", "123456789"});
 
         // Test policy settings
-        assertDoesNotThrow(() -> {
-            CLUI.executeCommand("setdeliverypolicy", new String[]{"fastest"});
-            CLUI.executeCommand("setprofitpolicy", new String[]{"targeted"});
-        });
+        CLUI.executeCommand("setdeliverypolicy", new String[]{"fastest"});
+        assertTrue(system.getDeliveryPolicy() instanceof com.foodora.policy.delivery.FastestDeliveryPolicy);
 
-        // Test reports
-        assertDoesNotThrow(() -> {
-            CLUI.executeCommand("showcourierdeliveries", new String[]{});
-            CLUI.executeCommand("showrestauranttop", new String[]{});
-            CLUI.executeCommand("showcustomers", new String[]{});
-            CLUI.executeCommand("showtotalprofit", new String[]{});
-        });
+        CLUI.executeCommand("setprofitpolicy", new String[]{"targeted"});
+        assertTrue(system.getTargetProfitPolicy() instanceof com.foodora.policy.target.TargetProfitByServiceFee);
     }
 } 
